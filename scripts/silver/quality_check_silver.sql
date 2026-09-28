@@ -81,6 +81,61 @@ FROM silver.crm_prd_info
 WHERE prd_start_dt>prd_end_dt
   
 
+-------------------------------------------------------
+
+
+-- crm_sales_details
+-- 1: Checking for unwanted spaces
+-- Expection: No results
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE TRIM(sls_ord_num) != sls_ord_num;
+
+
+-- 2: Checking for NULL or negative values
+-- Expection: No results
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_ord_num IS NULL;
+
+
+-- 3: Checking Invalid Dates
+-- Expectation: No result
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_order_dt IS NULL OR sls_order_dt <= 0 OR LENGTH(sls_order_dt::TEXT) != 8;
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_ship_dt IS NULL OR sls_ship_dt <= 0 OR LENGTH(sls_ship_dt::TEXT) != 8;
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_due_dt IS NULL OR sls_due_dt <= 0 OR LENGTH(sls_due_dt::TEXT) != 8;
+
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_order_dt > sls_ship_dt;
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_ship_dt > sls_due_dt;
+
+
+-- 4: sales data consistency
+-- expected: no results
+
+SELECT *
+FROM silver.crm_sales_details
+WHERE sls_sales IS NULL OR sls_sales <= 0
+   OR sls_price IS NULL OR sls_price <= 0
+   OR sls_sales != sls_quantity * sls_price;
+
+
 
 
 
