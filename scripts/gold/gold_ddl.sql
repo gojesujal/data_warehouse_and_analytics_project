@@ -1,10 +1,10 @@
--- dim_customer
+-- dim_customers
 -- we are storing this as a view
 
 --data integration: gender
 --data enrichment: added birthdate and country
 
-CREATE VIEW gold.dim_customer AS
+CREATE VIEW gold.dim_customers AS
 
 SELECT 
   ROW_NUMBER() OVER (ORDER BY ci.cst_id ) AS customer_key,
@@ -30,3 +30,41 @@ LEFT JOIN silver.erp_cust_az12 AS ca
 LEFT JOIN silver.erp_loc_a101 AS la
   ON ci.cst_key = la.cid
   
+
+
+
+----------------------------------------
+
+-- dim_products
+
+-- added category data from erp
+
+CREATE VIEW gold.dim_products AS
+
+SELECT
+  ROW_NUMBER() OVER (ORDER BY pi.prd_start_dt, pi.prd_key) as product_key,
+  pi.prd_id AS product_id,
+  pi.prd_key AS product_number,
+  pi.prd_nm AS product_name,
+  pi.cat_id AS category_id,
+  pc.cat AS category_name,
+  pc.subcat AS sub_category_name,
+  pc.maintenance,
+  pi.prd_cost AS cost,
+  pi.prd_line as line,
+  pi.prd_start_dt as start_date,
+  pi.prd_end_dt as end_date
+  
+
+FROM silver.crm_prd_info AS pi
+
+LEFT JOIN silver.erp_px_cat_g1v2 AS pc
+ON pi.cat_id = pc.id
+
+WHERE pi.prd_end_dt IS NULL
+
+limit 50
+
+
+
+
