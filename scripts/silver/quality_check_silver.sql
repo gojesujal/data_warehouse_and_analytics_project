@@ -137,6 +137,52 @@ WHERE sls_sales IS NULL OR sls_sales <= 0
 
 
 
+-----------------------------------------
+
+
+-- erp_cust_az12
+
+-- 1. Checking for duplicates in primary key
+-- Expected: No result
+
+SELECT cid, COUNT(cid)
+FROM silver.erp_cust_az12
+GROUP BY cid
+HAVING COUNT(cid) > 1;
+
+
+-- 2. Checking for NULL values in primary key
+-- Expected: No result
+
+SELECT cid
+FROM silver.erp_cust_az12
+WHERE cid IS NULL;
+
+
+-- 3. Checking for invalid values in bdate
+-- Expected: No result
+
+SELECT bdate
+FROM silver.erp_cust_az12
+WHERE bdate IS NULL;
+
+
+-- 4. Data standardization
+-- Expected: Male, Female or n/a
+
+SELECT DISTINCT(gen)
+FROM silver.erp_cust_az12;
+
+SELECT *
+FROM silver.erp_cust_az12
+WHERE gen IS NULL;
+
+
+
+
+
+
+
 
 
 
