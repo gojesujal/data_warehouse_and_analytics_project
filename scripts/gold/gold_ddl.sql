@@ -63,7 +63,33 @@ ON pi.cat_id = pc.id
 
 WHERE pi.prd_end_dt IS NULL
 
-limit 50
+
+----------------------------------------------
+
+
+
+-- fact_sales
+
+-- added surrogate keys to connect dimension tables 
+
+CREATE VIEW gold.fact_sales AS
+SELECT
+sd.sls_ord_num AS order_number,
+dp.product_key,
+dc.customer_key,
+sd.sls_order_dt AS order_date,
+sd.sls_ship_dt AS shipping_date,
+sd.sls_due_dt AS due_date,
+sd.sls_sales AS sales,
+sd.sls_quantity AS quantity,
+sd.sls_price as price
+
+FROM silver.crm_sales_details as sd
+
+LEFT JOIN gold.dim_customers AS dc ON sd.sls_cust_id = dc.customer_id::VARCHAR
+
+LEFT JOIN gold.dim_products AS dp ON sd.sls_prd_key = dp.product_number
+
 
 
 
