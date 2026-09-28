@@ -140,6 +140,7 @@ FROM bronze.crm_sales_details
 -- erp_cust_az12
 
 -- data dervation : cid
+-- set future dates to NULL
 -- data sandardization : gen
 
 
@@ -153,7 +154,8 @@ INSERT INTO silver.erp_cust_az12(
 SELECT
 
   CASE WHEN cid like 'NAS%' THEN SUBSTRING(cid,4,10) ELSE cid END AS cid,
-  bdate,
+  
+  CASE WHEN bdate > CURRENT_DATE THEN NULL ELSE bdate END AS bdate,
 
   CASE 
     WHEN gen IS NULL OR TRIM(gen) = '' THEN 'n/a'
