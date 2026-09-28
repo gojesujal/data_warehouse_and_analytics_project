@@ -151,7 +151,8 @@ INSERT INTO silver.erp_cust_az12(
   gen
 )
 SELECT
-  SUBSTRING(cid,4,10) AS cid,
+
+  CASE WHEN cid like 'NAS%' THEN SUBSTRING(cid,4,10) ELSE cid END AS cid,
   bdate,
 
   CASE 
