@@ -1,95 +1,61 @@
--- dim_customers
--- we are storing this as a view
+# Data Catalog for Gold Layer
 
---data integration: gender
---data enrichment: added birthdate and country
+## Overview
+The Gold Layer is the business-level data representation, structured to support analytical and reporting use cases. It consists of **dimension tables** and **fact tables** for specific business metrics.
 
-CREATE VIEW gold.dim_customers AS
+---
 
-SELECT 
-  ROW_NUMBER() OVER (ORDER BY ci.cst_id ) AS customer_key,
-  ci.cst_id as customer_id,
-  ci.cst_key as customer_no,
-  ci.cst_firstname as first_name,
-  ci.cst_lastname as last_name,
-  la.cntry as country,
-  ci.cst_marital_status as marital_status,
-  
-  case when ci.cst_gndr is null or ci.cst_gndr = 'n/a' then ca.gen
-    else ci.cst_gndr end as gender, --CRM is master
-  
-  ca.bdate as birth_date,
-  ci.cst_create_date as create_date
-  
-  
-FROM silver.crm_cust_info AS ci
-  
-LEFT JOIN silver.erp_cust_az12 AS ca
-  ON ci.cst_key = ca.cid
-  
-LEFT JOIN silver.erp_loc_a101 AS la
-  ON ci.cst_key = la.cid
-  
+### 1. **gold.dim_customers**
+- **Purpose:** Stores customer details enriched with demographic and geographic data.
+- **Columns:**
 
+| Column Name      | Data Type     | Description                                                                                   |
+|------------------|---------------|-----------------------------------------------------------------------------------------------|
+| customer_key     | INT           | Surrogate key uniquely identifying each customer record in the dimension table.               |
+| customer_id      | INT           | Unique numerical identifier assigned to each customer.                                        |
+| customer_number  | NVARCHAR(50)  | Alphanumeric identifier representing the customer, used for tracking and referencing.         |
+| first_name       | NVARCHAR(50)  | The customer's first name, as recorded in the system.                                         |
+| last_name        | NVARCHAR(50)  | The customer's last name or family name.                                                     |
+| country          | NVARCHAR(50)  | The country of residence for the customer (e.g., 'Australia').                               |
+| marital_status   | NVARCHAR(50)  | The marital status of the customer (e.g., 'Married', 'Single').                              |
+| gender           | NVARCHAR(50)  | The gender of the customer (e.g., 'Male', 'Female', 'n/a').                                  |
+| birthdate        | DATE          | The date of birth of the customer, formatted as YYYY-MM-DD (e.g., 1971-10-06).               |
+| create_date      | DATE          | The date and time when the customer record was created in the system|
 
+---
 
-----------------------------------------
+### 2. **gold.dim_products**
+- **Purpose:** Provides information about the products and their attributes.
+- **Columns:**
 
--- dim_products
+| Column Name         | Data Type     | Description                                                                                   |
+|---------------------|---------------|-----------------------------------------------------------------------------------------------|
+| product_key         | INT           | Surrogate key uniquely identifying each product record in the product dimension table.         |
+| product_id          | INT           | A unique identifier assigned to the product for internal tracking and referencing.            |
+| product_number      | NVARCHAR(50)  | A structured alphanumeric code representing the product, often used for categorization or inventory. |
+| product_name        | NVARCHAR(50)  | Descriptive name of the product, including key details such as type, color, and size.         |
+| category_id         | NVARCHAR(50)  | A unique identifier for the product's category, linking to its high-level classification.     |
+| category            | NVARCHAR(50)  | The broader classification of the product (e.g., Bikes, Components) to group related items.  |
+| subcategory         | NVARCHAR(50)  | A more detailed classification of the product within the category, such as product type.      |
+| maintenance_required| NVARCHAR(50)  | Indicates whether the product requires maintenance (e.g., 'Yes', 'No').                       |
+| cost                | INT           | The cost or base price of the product, measured in monetary units.                            |
+| product_line        | NVARCHAR(50)  | The specific product line or series to which the product belongs (e.g., Road, Mountain).      |
+| start_date          | DATE          | The date when the product became available for sale or use, stored in|
 
--- added category data from erp
+---
 
-CREATE VIEW gold.dim_products AS
+### 3. **gold.fact_sales**
+- **Purpose:** Stores transactional sales data for analytical purposes.
+- **Columns:**
 
-SELECT
-  ROW_NUMBER() OVER (ORDER BY pi.prd_start_dt, pi.prd_key) as product_key,
-  pi.prd_id AS product_id,
-  pi.prd_key AS product_number,
-  pi.prd_nm AS product_name,
-  pi.cat_id AS category_id,
-  pc.cat AS category_name,
-  pc.subcat AS sub_category_name,
-  pc.maintenance,
-  pi.prd_cost AS cost,
-  pi.prd_line as line,
-  pi.prd_start_dt as start_date,
-  pi.prd_end_dt as end_date
-  
-
-FROM silver.crm_prd_info AS pi
-
-LEFT JOIN silver.erp_px_cat_g1v2 AS pc
-ON pi.cat_id = pc.id
-
-WHERE pi.prd_end_dt IS NULL
-
-
-----------------------------------------------
-
-
-
--- fact_sales
-
--- added surrogate keys to connect dimension tables 
-
-CREATE VIEW gold.fact_sales AS
-SELECT
-sd.sls_ord_num AS order_number,
-dp.product_key,
-dc.customer_key,
-sd.sls_order_dt AS order_date,
-sd.sls_ship_dt AS shipping_date,
-sd.sls_due_dt AS due_date,
-sd.sls_sales AS sales,
-sd.sls_quantity AS quantity,
-sd.sls_price as price
-
-FROM silver.crm_sales_details as sd
-
-LEFT JOIN gold.dim_customers AS dc ON sd.sls_cust_id = dc.customer_id::VARCHAR
-
-LEFT JOIN gold.dim_products AS dp ON sd.sls_prd_key = dp.product_number
-
-
-
-
+| Column Name     | Data Type     | Description                                                                                   |
+|-----------------|---------------|-----------------------------------------------------------------------------------------------|
+| order_number    | NVARCHAR(50)  | A unique alphanumeric identifier for each sales order (e.g., 'SO54496').                      |
+| product_key     | INT           | Surrogate key linking the order to the product dimension table.                               |
+| customer_key    | INT           | Surrogate key linking the order to the customer dimension table.                              |
+| order_date      | DATE          | The date when the order was placed.                                                           |
+| shipping_date   | DATE          | The date when the order was shipped to the customer.                                          |
+| due_date        | DATE          | The date when the order payment was due.                                                      |
+| sales_amount    | INT           | The total monetary value of the sale for the line item, in whole currency units (e.g., 25).   |
+| quantity        | INT           | The number of units of the product ordered for the line item (e.g., 1).                       |
+| price           | INT           | The price per unit of the product for the line item, in whole currency units (e.g., 25).      |
