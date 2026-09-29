@@ -169,27 +169,6 @@ The Gold Layer specifically validates:
 
 ---
 
-## 📁 Repository Structure
-
-```text
-sql_data_warehouse_project/
-│
-├── datasets/
-│   └── Source CSV datasets
-│
-├── docs/
-│   └── Project documentation and data architecture
-│
-├── scripts/
-│   ├── Bronze/
-│   ├── Silver/
-│   └── Gold/
-│
-└── README.md
-```
-
----
-
 ## 🚀 Project Workflow
 
 1. Load source CSV files into the **Bronze Layer**.
