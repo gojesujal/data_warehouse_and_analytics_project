@@ -1,4 +1,3 @@
-```sql
 /*
 ===============================================================================
 Gold Layer: Quality Checks
@@ -77,4 +76,3 @@ LEFT JOIN gold.dim_products AS p
     ON p.product_key = f.product_key
 WHERE p.product_key IS NULL 
    OR c.customer_key IS NULL;
-```
