@@ -1,4 +1,3 @@
-```sql
 -- ============================================================
 -- TOTAL SALES, CUSTOMERS AND QUANTITY OVER MONTHS
 -- ============================================================
@@ -203,4 +202,3 @@ SELECT
 FROM cte
 GROUP BY 1
 ORDER BY 1 DESC;
-```
