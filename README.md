@@ -1,111 +1,103 @@
-# SQL Data Warehouse Project
+# SQL Data Warehouse & Analytics Project
 
-A modern SQL data warehouse project built using **PostgreSQL** and the **Medallion Architecture** to transform raw source data into clean, business-ready data for analytics and reporting.
+A modern **SQL data warehouse built with PostgreSQL**, following the **Medallion Architecture** to transform raw CRM and ERP data into clean, integrated, analytics-ready datasets.
+
+The project covers the complete workflow from raw data ingestion and ETL to dimensional modeling, data quality validation, and SQL-based analytics.
 
 ---
 
-## 📖 Project Overview
+## 📌 Project Overview
 
-This project involves:
+This project demonstrates how to build a data warehouse from multiple source systems and prepare the data for analytical workloads.
 
-1. **Data Architecture**: Designing a Modern Data Warehouse Using Medallion Architecture **Bronze**, **Silver**, and **Gold** layers.
-2. **ETL Pipelines**: Extracting, transforming, and loading data from source systems into the warehouse.
-3. **Data Modeling**: Developing fact and dimension tables optimized for analytical queries.
-4. **Analytics & Reporting**: Creating SQL-based reports and dashboards for actionable insights.
+The main stages of the project are:
+
+1. **Data Ingestion** — Load raw CRM and ERP CSV files into the Bronze layer.
+2. **Data Cleaning & Transformation** — Standardize and clean the data in the Silver layer.
+3. **Data Integration & Modeling** — Combine the cleaned sources into a Gold-layer dimensional model.
+4. **Data Quality** — Validate data consistency, uniqueness, relationships, and business rules.
+5. **Analytics** — Perform exploratory and advanced SQL analysis using the Gold layer.
 
 ---
 
 ## 🏗️ Data Architecture
 
-The project follows the **Medallion Architecture**:
-<img width="1268" height="568" alt="Screenshot 2026-09-29 at 9 13 01 AM" src="https://github.com/user-attachments/assets/19e05514-f145-4a39-bad3-ff855cfb5e7b" />
+The warehouse follows the **Medallion Architecture**:
 
+```text
+CRM CSV Files ─────┐
+                   ├──► Bronze ──► Silver ──► Gold ──► Analytics
+ERP CSV Files ─────┘
+```
 
 ### 🥉 Bronze Layer
 
-Stores raw data loaded from the source systems with minimal transformation.
+The Bronze layer stores the source data with minimal transformation.
 
-**Main responsibilities:**
+It contains raw data from:
 
-* Load raw source data
-* Preserve source-level information
-* Provide a foundation for downstream transformations
+* CRM customer data
+* CRM product data
+* CRM sales data
+* ERP customer data
+* ERP location data
+* ERP product category data
+
+The Bronze layer is responsible for:
+
+* Loading source data
+* Preserving the original source structure
+* Providing a raw foundation for downstream processing
+
+---
 
 ### 🥈 Silver Layer
 
-Cleans and standardizes the raw Bronze data.
+The Silver layer cleans and standardizes the Bronze data.
 
-**Main responsibilities:**
+Transformations include:
 
-* Data cleaning
-* Handling NULL and invalid values
-* Removing duplicates
-* Standardizing formats and values
-* Applying transformations and business rules
+* Removing duplicate records
+* Handling NULL and blank values
+* Standardizing categorical values
+* Cleaning customer and product attributes
+* Validating dates
+* Handling invalid or future dates
+* Deriving product start and end dates
+* Integrating related CRM and ERP information
+
+The goal of this layer is to produce **clean, consistent, and reliable data** for dimensional modeling.
+
+---
 
 ### 🥇 Gold Layer
 
-Contains business-ready data designed for analytical workloads.
+The Gold layer contains business-ready data organized using a **star-schema style dimensional model**.
 
-**Main responsibilities:**
+It consists of:
 
-* Create dimension and fact views
-* Integrate data from multiple source systems
-* Generate surrogate keys
-* Establish relationships between facts and dimensions
-* Prepare data for reporting and analytics
+### `gold.dim_customers`
 
----
+Customer dimension containing:
 
-## 🔄 ETL Process
-
-The warehouse follows a structured ETL workflow:
-
-```text
-Source CSV Files
-      │
-      ▼
-Bronze Layer
-      │
-      │  Cleaning & Transformation
-      ▼
-Silver Layer
-      │
-      │  Data Integration & Modeling
-      ▼
-Gold Layer
-      │
-      ▼
-Analytics & Reporting
-```
-
----
-
-## 🧩 Data Model
-
-The Gold Layer follows a **star-schema style dimensional model**.
-
-### Dimension Views
-
-#### `gold.dim_customers`
-
-Contains customer information including:
-
+* Customer key
 * Customer ID
 * Customer number
-* First and last name
+* First name
+* Last name
 * Country
 * Marital status
 * Gender
 * Birth date
 * Creation date
 
-Customer data is integrated from CRM and ERP sources.
+Customer information is integrated from the CRM and ERP source systems.
 
-#### `gold.dim_products`
+### `gold.dim_products`
 
-Contains product information including:
+Product dimension containing:
 
+* Product key
 * Product ID
 * Product number
 * Product name
@@ -114,15 +106,14 @@ Contains product information including:
 * Maintenance
 * Cost
 * Product line
-* Start and end dates
+* Start date
+* End date
 
-Product information is enriched with category data from ERP.
+Product category information is enriched using the ERP source data.
 
-### Fact View
+### `gold.fact_sales`
 
-#### `gold.fact_sales`
-
-Contains sales transactions and connects them to the customer and product dimensions using surrogate keys.
+Sales fact containing transactional measures and relationships to the customer and product dimensions.
 
 Key measures include:
 
@@ -136,64 +127,151 @@ Key dates include:
 * Shipping date
 * Due date
 
+Surrogate keys are used to connect the fact table with the corresponding dimensions.
+
+---
+
+## 📊 Analytics
+
+The `analytics/` directory contains SQL analyses performed on the Gold layer.
+
+The analysis covers areas such as:
+
+* Database and dimension exploration
+* Date and time analysis
+* Measures and KPIs
+* Changes over time
+* Cumulative analysis
+* Performance analysis
+* Part-to-whole analysis
+* Customer segmentation
+* Product and customer reporting
+
+The analytical queries are designed to demonstrate practical SQL techniques used to explore data, identify trends, measure performance, and generate business insights.
+
 ---
 
 ## 🔍 Data Quality
 
-Quality checks are performed throughout the warehouse to improve data reliability.
+Data quality checks are performed throughout the warehouse to ensure the reliability of the final dataset.
 
-Examples include:
+Checks include:
 
-* Duplicate primary-key checks
-* NULL checks
-* Data standardization checks
-* Invalid date checks
-* Referential integrity checks
-* Dimension key uniqueness checks
+* Duplicate detection
+* NULL validation
+* Data standardization
+* Invalid date detection
+* Primary-key uniqueness
+* Surrogate-key uniqueness
+* Referential integrity
 * Fact-to-dimension relationship validation
 
-The Gold Layer specifically validates:
+The Gold layer specifically validates relationships between:
 
-* Uniqueness of customer surrogate keys
-* Uniqueness of product surrogate keys
-* Referential integrity between `fact_sales` and the customer/product dimensions
+```text
+gold.fact_sales
+       │
+       ├──► gold.dim_customers
+       │
+       └──► gold.dim_products
+```
+
+---
+
+## 📂 Repository Structure
+
+```text
+data_warehouse_and_analytics_project/
+│
+├── analytics/
+│   └── SQL queries for data exploration,
+│       analysis, reporting, and insights
+│
+├── datasets/
+│   ├── source_crm/
+│   │   ├── cust_info.csv
+│   │   ├── prd_info.csv
+│   │   └── sales_details.csv
+│   │
+│   └── source_erp/
+│       ├── CUST_AZ12.csv
+│       ├── LOC_A101.csv
+│       └── PX_CAT_G1V2.csv
+│
+├── docs/
+│   ├── Data Warehouse Architecture
+│   ├── Data Catalog
+│   ├── Data Flow
+│   └── Data Model
+│
+├── scripts/
+│   ├── bronze/
+│   │   ├── bronze_ddl.sql
+│   │   └── load_bronze.sql
+│   │
+│   ├── silver/
+│   │   ├── silver_ddl.sql
+│   │   ├── load_silver.sql
+│   │   └── quality_check_silver.sql
+│   │
+│   ├── gold/
+│   │   ├── gold_ddl.sql
+│   │   └── quality_check_gold.sql
+│   │
+│   └── init_script.sql
+│
+└── README.md
+```
+
+---
+
+## 🔄 Project Workflow
+
+```text
+1. Source CSV Files
+        ↓
+2. Bronze Layer
+        ↓
+3. Data Cleaning & Validation
+        ↓
+4. Silver Layer
+        ↓
+5. Data Integration & Business Rules
+        ↓
+6. Gold Layer
+        ↓
+7. Data Quality Checks
+        ↓
+8. Analytics
+```
 
 ---
 
 ## 🛠️ Technologies Used
 
 * **PostgreSQL** — Data warehouse database
-* **SQL** — Data transformation, validation, and analysis
+* **SQL** — ETL, transformations, data validation, and analytics
 * **Git & GitHub** — Version control
 * **CSV** — Source data format
 
 ---
 
-## 🚀 Project Workflow
+## 🎯 Project Objectives
 
-1. Load source CSV files into the **Bronze Layer**.
-2. Validate the raw data.
-3. Transform and clean the data into the **Silver Layer**.
-4. Apply business rules and standardization.
-5. Build the **Gold Layer** dimensional model.
-6. Create customer and product dimensions.
-7. Create the sales fact view.
-8. Perform Gold Layer quality checks.
-9. Use the Gold Layer for analytical queries and reporting.
+This project was built to practice and demonstrate:
 
----
-
-## 🎯 Project Goals
-
-The main goals of this project are to:
-
-* Build a structured SQL data warehouse.
-* Practice real-world ETL workflows.
-* Understand Medallion Architecture.
-* Develop dimensional data models.
-* Improve SQL and PostgreSQL skills.
-* Implement data quality and validation checks.
-* Create analytics-ready datasets.
+* SQL and PostgreSQL
+* Data warehouse architecture
+* Medallion Architecture
+* ETL pipelines
+* Data cleaning and transformation
+* CRM and ERP data integration
+* Dimensional modeling
+* Star schema design
+* Fact and dimension modeling
+* Data quality validation
+* Analytical SQL
+* Git and GitHub workflows
 
 ---
 
