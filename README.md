@@ -23,6 +23,7 @@ The main stages of the project are:
 ## 🏗️ Data Architecture
 
 The warehouse follows the **Medallion Architecture**:
+<img width="1262" height="587" alt="Screenshot 2026-10-08 at 9 47 38 AM" src="https://github.com/user-attachments/assets/c2b27a4d-36af-4409-a37a-2177c4cde6dd" />
 
 ```text
 CRM CSV Files ─────┐
